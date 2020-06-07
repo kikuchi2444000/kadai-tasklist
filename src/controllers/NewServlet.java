@@ -1,7 +1,7 @@
 package controllers;
 
 import java.io.IOException;
-import java.util.List;
+import java.sql.Timestamp;
 
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
@@ -14,16 +14,16 @@ import models.Task;
 import utils.DBUtil;
 
 /**
- * Servlet implementation class Indexservlet
+ * Servlet implementation class NewServlet
  */
-@WebServlet("/index")
-public class Indexservlet extends HttpServlet {
+@WebServlet("/new")
+public class NewServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public Indexservlet() {
+    public NewServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -33,10 +33,25 @@ public class Indexservlet extends HttpServlet {
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         EntityManager em = DBUtil.createEntityManager();
+        em.getTransaction().begin();
 
-        List<Task> tasks = em.createNamedQuery("getAllTasks", Task.class)
-                            .getResultList();
-        response.getWriter().append(Integer.valueOf(tasks.size()).toString());
+        //Taskのインスタンスを生成
+        Task t = new Task();
+
+        //tの各プロパティにデータを代入
+        String content = "tel";
+        t.setContent(content);
+
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());      //現在の日時を取得
+        t.setCreated_at(currentTime);
+        t.setUpdated_at(currentTime);
+
+        //データベースに保存
+        em.persist(t);
+        em.getTransaction().commit();
+
+        //自動採番されたIDの値を表示
+        response.getWriter().append(Integer.valueOf(t.getId()).toString());
 
         em.close();
     }
